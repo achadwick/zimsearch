@@ -1,0 +1,34 @@
+0. zimsearch
+
+zimsearch is a simple proof-of-concept implementation of a GNOME Shell search 
+provider for Zim pages.
+
+***************************************************************
+*** THIS IS VERY EARLY ALPHA SOFTWARE. USE AT YOUR OWN RISK ***
+***************************************************************
+
+1. Installation
+
+Run install.sh as root to install the provider, and restart the shell. 
+uninstall.sh reverts the modifications. Both scripts use ${DESTDIR} as a prefix 
+to install and remove files.
+
+2. Usage
+
+Search terms typed in the GNOME Shell overview are used to lookup Zim pages 
+from the default notebook. Clicking in a search result opens Zim (if not 
+already open) and shows the selected page. The same syntax as command zim 
+--search is accepted, e.g. tag: (see Zim manual).
+
+It is possible to search pages in a different notebook by passing the special 
+term notebook:<NAME>, replacing <NAME> by the notebook name (if you need to 
+search using a term starting with "notebook:", simply wrap it in double 
+quotes).
+
+3. Bugs
+
+Please, send bug reports to dsboger at gmail dot com.
+
+4. Changelog
+
+* 2014/09/26: initial release

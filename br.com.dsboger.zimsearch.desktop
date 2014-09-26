@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=ZimSearch
+Comment=Search Zim pages
+Exec=/usr/bin/zimsearch.py
+Icon=zim
+Terminal=false
+Type=Application
+NoDisplay=true
+DBusActivatable=true
+Name[pt_BR]=br.com.dsboger.zimsearch.desktop
