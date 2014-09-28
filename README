@@ -1,5 +1,8 @@
 0. zimsearch
 
+Author: Davi da Silva Böger
+GitHub: https://github.com/dsboger/zimsearch
+
 zimsearch is a simple proof-of-concept implementation of a GNOME Shell search 
 provider for Zim pages.
 
@@ -27,7 +30,8 @@ quotes).
 
 3. Bugs
 
-Please, send bug reports to dsboger at gmail dot com.
+Please, send bug reports to dsboger at gmail dot com. Or fill them in github
+issue tracker.
 
 4. Changelog
 
