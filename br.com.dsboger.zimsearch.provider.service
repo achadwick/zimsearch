@@ -1,3 +1,0 @@
-[D-BUS Service]
-Name=br.com.dsboger.zimsearch.provider
-Exec=/usr/bin/zimsearch.py --gapplication-service
