@@ -18,8 +18,10 @@ See INSTALL for installation instructions.
 
 Search terms typed in the GNOME Shell overview are used to lookup Zim pages 
 from the default notebook. Clicking in a search result opens Zim (if not 
-already open) and shows the selected page. The same syntax as command "zim 
---search" is accepted, e.g. "tag:" (see Zim manual).
+already open) and shows the selected page. Currently, the search terms are 
+treated as a single string that is matched against page titles (NOT the full 
+path). Further improvements will bring more flexibility to the matching 
+algorithm (like matching terms out of order).
 
 It is possible to search pages in a different notebook by passing the special 
 term "notebook:<NAME>", replacing "<NAME>" by the notebook name (if you need to 

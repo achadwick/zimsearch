@@ -103,15 +103,13 @@ class Provider(dbus.service.Object):
 
 		if self.timeout_id:
 			self._cancel_search()
-			
-		import zim.search
-		
-		query = zim.search.Query(" ".join(terms))
-		selection = zim.search.SearchSelection(search_notebook)
-		selection.search(query)
-		result = [search_notebook.name + "#" + page.name for page in selection]
+
+		result = []
+		query = " ".join(terms).lower()
+		for page in search_notebook.index.walk():
+			if query in page.basename.lower():
+				result.append(search_notebook.name + "#" + page.name)
 		reply_handler(result)
-		
 		
 	def _get_search_results(self, reply_handler, search_notebook):
 		pass
