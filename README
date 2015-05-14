@@ -12,9 +12,7 @@ provider for Zim pages.
 
 1. Installation
 
-Run install.sh as root to install the provider, and restart the shell. 
-uninstall.sh reverts the modifications. Both scripts use the first argument as 
-a prefix to the install location.
+See INSTALL for installation instructions.
 
 2. Usage
 
