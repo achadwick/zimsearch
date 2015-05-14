@@ -1,1 +1,4 @@
-/usr/share/automake-1.15/INSTALL
+./autogen.sh
+PYTHON=<path to python 2> ./configure
+make
+make install
