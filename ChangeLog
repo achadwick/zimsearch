@@ -1,3 +1,4 @@
 [Unreleased] [unreleased]
 	Changed:
+		- core: Changed search strategy to match against page titles
 		- build: Started using autotools
