@@ -1,4 +1,5 @@
 [Unreleased] [unreleased]
 	Changed:
+		- core: Added option to search all notebooks instead of only default
 		- core: Changed search strategy to match against page titles
 		- build: Started using autotools
