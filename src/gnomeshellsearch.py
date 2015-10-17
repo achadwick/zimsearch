@@ -109,11 +109,18 @@ class Provider(dbus.service.Object):
 			self._cancel_search()
 
 		result = []
-		query = " ".join(terms).lower()
 		for search_notebook in search_notebooks:
 			for page in search_notebook.index.walk():
-				if query in page.basename.lower():
+				page_name_lower = page.basename.lower()
+				contains_all_terms = True
+				for term in terms:
+					if not term in page_name_lower:
+						contains_all_terms = False
+						break
+				
+				if contains_all_terms:
 					result.append(search_notebook.name + "#" + page.name)
+
 		reply_handler(result)
 		
 	def _get_search_results(self, reply_handler, search_notebook):
