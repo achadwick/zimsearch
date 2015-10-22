@@ -20,11 +20,12 @@ class GnomeShellSearchPluginCommand(NotebookCommand):
 	def run(self):
 		from zim.config import ConfigManager
 		
-		notebook, p = self.build_notebook()
+		notebook, _ = self.build_notebook()
 		config_manager = ConfigManager()
 		preferences = config_manager.get_config_dict('preferences.conf')['GnomeShellSearch']
 		preferences.setdefault('search_all', True)
 		Provider(notebook, preferences['search_all']).main()
+
 		
 from zim.plugins import PluginClass
 		
@@ -47,11 +48,12 @@ Disabling this plugin has no effect. Please, use the "System Settings > Search" 
 	def __init__(self, config=None):
 		PluginClass.__init__(self, config)
 
-
 		
 import dbus.service
 
 SEARCH_IFACE='org.gnome.Shell.SearchProvider2'
+BUS_NAME='net.launchpad.zim.plugins.gnomeshellsearch.provider'
+OBJECT_PATH='/net/launchpad/zim/plugins/gnomeshellsearch/provider'
 
 class Provider(dbus.service.Object):
 
@@ -59,12 +61,11 @@ class Provider(dbus.service.Object):
 		import dbus.mainloop.glib
 		
 		dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
-		name = dbus.service.BusName('net.launchpad.zim.plugins.gnomeshellsearch.provider', bus=dbus.SessionBus())
-		dbus.service.Object.__init__(self, bus_name=name, object_path='/net/launchpad/zim/plugins/gnomeshellsearch/provider')
+		name = dbus.service.BusName(BUS_NAME, bus=dbus.SessionBus())
+		dbus.service.Object.__init__(self, bus_name=name, object_path=OBJECT_PATH)
 		
 		self.notebook = notebook
 		self.notebook_cache = {}
-		self.timeout_id = None
 		self.search_all = search_all
 		
 	def main(self):
@@ -81,15 +82,63 @@ class Provider(dbus.service.Object):
 				in_signature='as', out_signature='as', 
 				async_callbacks=('reply_handler', 'error_handler'))
 	def GetInitialResultSet(self, terms, reply_handler, error_handler):
-		self._start_search(terms, reply_handler)
+		self._search(terms, reply_handler)
 	
 	@dbus.service.method(dbus_interface=SEARCH_IFACE, 
 				in_signature='asas', out_signature='as',
 				async_callbacks=('reply_handler', 'error_handler'))
 	def GetSubsearchResultSet(self, prev_results, terms, reply_handler, error_handler):
-		self._start_search(terms, reply_handler)
+		self._search(terms, reply_handler)
 		
-	def _start_search(self, terms, reply_handler):
+	
+	@dbus.service.method(dbus_interface=SEARCH_IFACE, 
+						in_signature='as', out_signature='aa{sv}')
+	def GetResultMetas(self, identifiers):
+		metas = []
+		for result_id in identifiers:
+			notebook_id, page_id = self._from_result_id(result_id)
+			path = page_id.split(":")
+			name = path[-1]
+			description = "(%s) %s" % (notebook_id, "/".join(path[0:-1]))
+			meta = {
+				"id": result_id,
+				"name": name,
+				"gicon": "text-x-generic",
+				"description": description
+			}
+			metas.append(meta)
+		return metas
+		
+	@dbus.service.method(dbus_interface=SEARCH_IFACE, 
+						in_signature='sasu', out_signature='')
+	def ActivateResult(self, identifier, terms, timestamp):
+		notebook_id, page_id = identifier.split("#")
+		server = self._get_server()
+		search_notebook = self._get_notebook(notebook_id)
+		gui = server.get_notebook(search_notebook)
+		gui.present(page=page_id)
+	
+	@dbus.service.method(dbus_interface=SEARCH_IFACE, 
+						in_signature='asu', out_signature='')
+	def LaunchSearch(self, terms, timestamp):
+		if not self.search_all:
+			server = self._get_server()
+			gui = server.get_notebook(self.notebook)
+			gui.present()
+			gui.open_page()
+
+	def _search(self, terms, reply_handler):
+		notebook_terms, normal_terms = self._process_terms(terms)
+		search_notebooks = self._get_search_notebooks(notebook_terms)
+		if not search_notebooks:
+			reply_handler([])
+		else:
+			result = []
+			for search_notebook in search_notebooks:
+				result.extend(self._search_notebook(search_notebook, normal_terms))
+			reply_handler(result)
+	
+	def _process_terms(self, terms):
 		notebook_terms = []
 		normal_terms = []
 		for term in terms:
@@ -98,37 +147,8 @@ class Provider(dbus.service.Object):
 				notebook_terms.append(term[9:])
 			else:
 				normal_terms.append(term.lower())
-		terms = normal_terms
-
-		search_notebooks = self._get_search_notebooks(notebook_terms)
-		if not search_notebooks:
-			reply_handler([])
-			return None
-
-		if self.timeout_id:
-			self._cancel_search()
-
-		result = []
-		for search_notebook in search_notebooks:
-			for page in search_notebook.index.walk():
-				page_name_lower = page.basename.lower()
-				contains_all_terms = True
-				for term in terms:
-					if not term in page_name_lower:
-						contains_all_terms = False
-						break
-				
-				if contains_all_terms:
-					result.append(search_notebook.name + "#" + page.name)
-
-		reply_handler(result)
-		
-	def _get_search_results(self, reply_handler, search_notebook):
-		pass
-		
-	def _cancel_search(self):
-		pass
-		
+		return notebook_terms, normal_terms
+	
 	def _get_search_notebooks(self, notebook_terms):
 		import zim.notebook
 		
@@ -149,6 +169,20 @@ class Provider(dbus.service.Object):
 			search_notebooks.append(self._load_notebook(notebook_info.name))
 			
 		return search_notebooks
+
+	def _search_notebook(self, search_notebook, terms):
+		result = []
+		for page in search_notebook.index.walk():
+			page_name_lower = page.basename.lower()
+			contains_all_terms = True
+			for term in terms:
+				if not term in page_name_lower:
+					contains_all_terms = False
+					break
+			if contains_all_terms:
+				result_id = self._to_result_id(search_notebook.name, page.name)
+				result.append(result_id)
+		return result
 		
 	def _get_notebook(self, notebook_id=None):
 		notebook = None
@@ -170,45 +204,16 @@ class Provider(dbus.service.Object):
 				notebook, _ = zim.notebook.build_notebook(notebook_info)
 				self.notebook_cache[notebook_id] = notebook
 		return notebook
-		
-	@dbus.service.method(dbus_interface=SEARCH_IFACE, 
-						in_signature='as', out_signature='aa{sv}')
-	def GetResultMetas(self, identifiers):
-		metas = []
-		for identifier in identifiers:
-			notebook_id, page_id = identifier.split("#")
-			path = page_id.split(":")
-			name = path[-1]
-			description = "(%s) %s" % (notebook_id, "/".join(path[0:-1]))
-			meta = {
-				"id": identifier,
-				"name": name,
-				"gicon": "text-x-generic",
-				"description": description
-			}
-			metas.append(meta)
-		return metas
-		
+			
 	def _get_server(self):
 		import zim.ipc
+		
 		zim.ipc.start_server_if_not_running()
 		return zim.ipc.ServerProxy()
+			
+	def _to_result_id(self, notebook_id, page_id):
+		return notebook_id + "#" + page_id
 	
-	@dbus.service.method(dbus_interface=SEARCH_IFACE, 
-						in_signature='sasu', out_signature='')
-	def ActivateResult(self, identifier, terms, timestamp):
-		notebook_id, page_id = identifier.split("#")
-		server = self._get_server()
-		search_notebook = self._get_notebook(notebook_id)
-		gui = server.get_notebook(search_notebook)
-		gui.present(page=page_id)
+	def _from_result_id(self, result_id):
+		return result_id.split("#")
 	
-	@dbus.service.method(dbus_interface=SEARCH_IFACE, 
-						in_signature='asu', out_signature='')
-	def LaunchSearch(self, terms, timestamp):
-		if not self.search_all:
-			server = self._get_server()
-			gui = server.get_notebook(self.notebook)
-			gui.present()
-			gui.open_page()
-		
