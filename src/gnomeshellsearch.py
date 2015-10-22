@@ -32,12 +32,12 @@ from zim.plugins import PluginClass
 class GnomeShellSearch(PluginClass):
 
 	plugin_info = {
-		'name': _('GNOME Shell Search'), # T: plugin name
+		'name': _('GNOME Shell Search'),  # T: plugin name
 		'description': _('''\
 This plugin provides search results for GNOME Shell.
 
 Disabling this plugin has no effect. Please, use the "System Settings > Search" to disable Zim search results.
-'''), # T: plugin description
+'''),  # T: plugin description
 		'author': 'Davi da Silva Böger',
 	}
 	
@@ -51,9 +51,9 @@ Disabling this plugin has no effect. Please, use the "System Settings > Search" 
 		
 import dbus.service
 
-SEARCH_IFACE='org.gnome.Shell.SearchProvider2'
-BUS_NAME='net.launchpad.zim.plugins.gnomeshellsearch.provider'
-OBJECT_PATH='/net/launchpad/zim/plugins/gnomeshellsearch/provider'
+SEARCH_IFACE = 'org.gnome.Shell.SearchProvider2'
+BUS_NAME = 'net.launchpad.zim.plugins.gnomeshellsearch.provider'
+OBJECT_PATH = '/net/launchpad/zim/plugins/gnomeshellsearch/provider'
 
 class Provider(dbus.service.Object):
 
@@ -78,13 +78,21 @@ class Provider(dbus.service.Object):
 		
 		gtk.main_quit()
 
-	@dbus.service.method(dbus_interface=SEARCH_IFACE, 
-				in_signature='as', out_signature='as', 
+	@dbus.service.method(dbus_interface=SEARCH_IFACE,
+				in_signature='as', out_signature='as',
 				async_callbacks=('reply_handler', 'error_handler'))
 	def GetInitialResultSet(self, terms, reply_handler, error_handler):
-		self._search(terms, reply_handler)
+		notebook_terms, normal_terms = self._process_terms(terms)
+		search_notebooks = self._get_search_notebooks(notebook_terms)
+		if not search_notebooks:
+			reply_handler([])
+		else:
+			result = []
+			for search_notebook in search_notebooks:
+				result.extend(self._search_notebook(search_notebook, normal_terms))
+			reply_handler(result)
 	
-	@dbus.service.method(dbus_interface=SEARCH_IFACE, 
+	@dbus.service.method(dbus_interface=SEARCH_IFACE,
 				in_signature='asas', out_signature='as',
 				async_callbacks=('reply_handler', 'error_handler'))
 	def GetSubsearchResultSet(self, prev_results, terms, reply_handler, error_handler):
@@ -99,7 +107,7 @@ class Provider(dbus.service.Object):
 					results.append(result_id)
 		reply_handler(results)
 	
-	@dbus.service.method(dbus_interface=SEARCH_IFACE, 
+	@dbus.service.method(dbus_interface=SEARCH_IFACE,
 						in_signature='as', out_signature='aa{sv}')
 	def GetResultMetas(self, identifiers):
 		metas = []
@@ -117,16 +125,16 @@ class Provider(dbus.service.Object):
 			metas.append(meta)
 		return metas
 		
-	@dbus.service.method(dbus_interface=SEARCH_IFACE, 
+	@dbus.service.method(dbus_interface=SEARCH_IFACE,
 						in_signature='sasu', out_signature='')
 	def ActivateResult(self, identifier, terms, timestamp):
 		notebook_id, page_id = self._from_result_id(identifier)
 		server = self._get_server()
-		search_notebook = self._get_notebook(notebook_id)
-		gui = server.get_notebook(search_notebook)
+		notebook = self._load_notebook(notebook_id)
+		gui = server.get_notebook(notebook)
 		gui.present(page=page_id)
 	
-	@dbus.service.method(dbus_interface=SEARCH_IFACE, 
+	@dbus.service.method(dbus_interface=SEARCH_IFACE,
 						in_signature='asu', out_signature='')
 	def LaunchSearch(self, terms, timestamp):
 		if not self.search_all:
@@ -135,23 +143,11 @@ class Provider(dbus.service.Object):
 			gui.present()
 			gui.open_page()
 
-	def _search(self, terms, reply_handler):
-		notebook_terms, normal_terms = self._process_terms(terms)
-		search_notebooks = self._get_search_notebooks(notebook_terms)
-		if not search_notebooks:
-			reply_handler([])
-		else:
-			result = []
-			for search_notebook in search_notebooks:
-				result.extend(self._search_notebook(search_notebook, normal_terms))
-			reply_handler(result)
-	
 	def _process_terms(self, terms):
 		notebook_terms = []
 		normal_terms = []
 		for term in terms:
-			index = term.find("#")
-			if index == 0:
+			if term.startswith("#"):
 				notebook_terms.append(term[1:].lower())
 			else:
 				normal_terms.append(term.lower())
@@ -186,26 +182,6 @@ class Provider(dbus.service.Object):
 				result.append(result_id)
 		return result
 	
-	def _contains_all_terms(self, page_name_lower, terms):
-		for term in terms:
-			if not term in page_name_lower:
-				return False
-		return True
-	
-	def _contains_any_term(self, notebook_id_lower, terms):
-		for term in terms:
-			if term in notebook_id_lower:
-				return True
-		return False
-		
-	def _get_notebook(self, notebook_id=None):
-		notebook = None
-		if not notebook_id or notebook_id == self.notebook.name:
-			notebook = self.notebook
-		else:
-			notebook = self._load_notebook(notebook_id)
-		return notebook
-
 	def _load_notebook(self, notebook_id):
 		if notebook_id in self.notebook_cache:
 			notebook = self.notebook_cache[notebook_id]
@@ -224,10 +200,21 @@ class Provider(dbus.service.Object):
 		
 		zim.ipc.start_server_if_not_running()
 		return zim.ipc.ServerProxy()
-			
+	
 	def _to_result_id(self, notebook_id, page_id):
 		return notebook_id + "#" + page_id
 	
 	def _from_result_id(self, result_id):
 		return result_id.split("#")
 	
+	def _contains_all_terms(self, contents, terms):
+		for term in terms:
+			if not term in contents:
+				return False
+		return True
+	
+	def _contains_any_term(self, contents, terms):
+		for term in terms:
+			if term in contents:
+				return True
+		return False
