@@ -142,9 +142,9 @@ class Provider(dbus.service.Object):
 		notebook_terms = []
 		normal_terms = []
 		for term in terms:
-			index = term.find("notebook:")
+			index = term.find("nb:")
 			if index == 0:
-				notebook_terms.append(term[9:])
+				notebook_terms.append(term[3:])
 			else:
 				normal_terms.append(term.lower())
 		return notebook_terms, normal_terms
