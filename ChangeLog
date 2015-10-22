@@ -1,5 +1,6 @@
 [Unreleased] [unreleased]
 	Changed:
+		- core: LaunchSearch opens Jump To (Ctrl+J) and not Search (Ctrl+Shift+F)
 		- core: Filter pages using terms independently (order or terms not important)
 		- core: Added option to search all notebooks instead of only default
 		- core: Changed search strategy to match against page titles

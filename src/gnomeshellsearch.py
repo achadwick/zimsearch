@@ -209,5 +209,5 @@ class Provider(dbus.service.Object):
 		server = self._get_server()
 		gui = server.get_notebook(self.notebook)
 		gui.present()
-		gui.show_search(" ".join(terms))
+		gui.open_page()
 		
