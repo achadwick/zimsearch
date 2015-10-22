@@ -112,7 +112,7 @@ class Provider(dbus.service.Object):
 	@dbus.service.method(dbus_interface=SEARCH_IFACE, 
 						in_signature='sasu', out_signature='')
 	def ActivateResult(self, identifier, terms, timestamp):
-		notebook_id, page_id = identifier.split("#")
+		notebook_id, page_id = self._from_result_id(identifier)
 		server = self._get_server()
 		search_notebook = self._get_notebook(notebook_id)
 		gui = server.get_notebook(search_notebook)
@@ -174,15 +174,16 @@ class Provider(dbus.service.Object):
 		result = []
 		for page in search_notebook.index.walk():
 			page_name_lower = page.basename.lower()
-			contains_all_terms = True
-			for term in terms:
-				if not term in page_name_lower:
-					contains_all_terms = False
-					break
-			if contains_all_terms:
+			if self._contains_all_terms(page_name_lower, terms):
 				result_id = self._to_result_id(search_notebook.name, page.name)
 				result.append(result_id)
 		return result
+	
+	def _contains_all_terms(self, page_name_lower, terms):
+		for term in terms:
+			if not term in page_name_lower:
+				return False
+		return True
 		
 	def _get_notebook(self, notebook_id=None):
 		notebook = None
