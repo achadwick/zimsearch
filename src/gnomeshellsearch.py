@@ -88,8 +88,15 @@ class Provider(dbus.service.Object):
 				in_signature='asas', out_signature='as',
 				async_callbacks=('reply_handler', 'error_handler'))
 	def GetSubsearchResultSet(self, prev_results, terms, reply_handler, error_handler):
-		self._search(terms, reply_handler)
-		
+		notebook_terms, normal_terms = self._process_terms(terms)
+		results = []
+		for result_id in prev_results:
+			notebook_id, page_id = self._from_result_id(result_id)
+			if (not notebook_terms) or notebook_id in notebook_terms:
+				page_name_lower = page_id.split(':')[-1].lower()
+				if self._contains_all_terms(page_name_lower, normal_terms):
+					results.append(result_id)
+		reply_handler(results)
 	
 	@dbus.service.method(dbus_interface=SEARCH_IFACE, 
 						in_signature='as', out_signature='aa{sv}')
