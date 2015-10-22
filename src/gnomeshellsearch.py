@@ -92,7 +92,8 @@ class Provider(dbus.service.Object):
 		results = []
 		for result_id in prev_results:
 			notebook_id, page_id = self._from_result_id(result_id)
-			if (not notebook_terms) or notebook_id in notebook_terms:
+			notebook_id_lower = notebook_id.lower()
+			if (not notebook_terms) or self._contains_any_term(notebook_id_lower, notebook_terms):
 				page_name_lower = page_id.split(':')[-1].lower()
 				if self._contains_all_terms(page_name_lower, normal_terms):
 					results.append(result_id)
@@ -106,7 +107,7 @@ class Provider(dbus.service.Object):
 			notebook_id, page_id = self._from_result_id(result_id)
 			path = page_id.split(":")
 			name = path[-1]
-			description = "(%s) %s" % (notebook_id, "/".join(path[0:-1]))
+			description = "(#%s) %s" % (notebook_id, "/".join(path[0:-1]))
 			meta = {
 				"id": result_id,
 				"name": name,
@@ -149,9 +150,9 @@ class Provider(dbus.service.Object):
 		notebook_terms = []
 		normal_terms = []
 		for term in terms:
-			index = term.find("nb:")
+			index = term.find("#")
 			if index == 0:
-				notebook_terms.append(term[3:])
+				notebook_terms.append(term[1:].lower())
 			else:
 				normal_terms.append(term.lower())
 		return notebook_terms, normal_terms
@@ -162,9 +163,8 @@ class Provider(dbus.service.Object):
 		search_notebooks_info = []
 		notebook_list = zim.notebook.get_notebook_list()
 		if notebook_terms:
-			for notebook_id in notebook_terms:
-				notebook_info = notebook_list.get_by_name(notebook_id)
-				if notebook_info:
+			for notebook_info in notebook_list:
+				if self._contains_any_term(notebook_info.name.lower(), notebook_terms): 
 					search_notebooks_info.append(notebook_info)
 		elif self.search_all:
 			search_notebooks_info.extend(notebook_list)
@@ -191,6 +191,12 @@ class Provider(dbus.service.Object):
 			if not term in page_name_lower:
 				return False
 		return True
+	
+	def _contains_any_term(self, notebook_id_lower, terms):
+		for term in terms:
+			if term in notebook_id_lower:
+				return True
+		return False
 		
 	def _get_notebook(self, notebook_id=None):
 		notebook = None
