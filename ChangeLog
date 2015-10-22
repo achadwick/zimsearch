@@ -1,8 +1,11 @@
-[Unreleased] [unreleased]
-	Changed:
-		- core: LaunchSearch only makes sense if not search_all
-		- core: LaunchSearch opens Jump To (Ctrl+J) and not Search (Ctrl+Shift+F)
-		- core: Filter pages using terms independently (order or terms not important)
-		- core: Added option to search all notebooks instead of only default
-		- core: Changed search strategy to match against page titles
-		- build: Started using autotools
+# Change Log
+
+## [Unreleased] [unreleased]
+### Changed:
+- docs: Converted documentation to Markdown syntax
+- core: LaunchSearch only makes sense if not search_all
+- core: LaunchSearch opens Jump To (Ctrl+J) and not Search (Ctrl+Shift+F)
+- core: Filter pages using terms independently (order or terms not important)
+- core: Added option to search all notebooks instead of only default
+- core: Changed search strategy to match against page titles
+- build: Started using autotools

@@ -1,4 +1,4 @@
-0. zimsearch
+# zimsearch
 
 Author: Davi da Silva Böger
 GitHub: https://github.com/dsboger/zimsearch
@@ -6,15 +6,13 @@ GitHub: https://github.com/dsboger/zimsearch
 zimsearch is a simple proof-of-concept implementation of a GNOME Shell search 
 provider for Zim pages.
 
-***************************************************************
-*** THIS IS VERY EARLY ALPHA SOFTWARE. USE AT YOUR OWN RISK ***
-***************************************************************
+**THIS IS VERY EARLY ALPHA SOFTWARE. USE AT YOUR OWN RISK**
 
-1. Installation
+# Installation
 
 See INSTALL for installation instructions.
 
-2. Usage
+# Usage
 
 Search terms typed in the GNOME Shell overview are used to lookup Zim pages 
 from the default notebook. Clicking in a search result opens Zim (if not 
@@ -24,11 +22,11 @@ path). Further improvements will bring more flexibility to the matching
 algorithm (like matching terms out of order).
 
 It is possible to search pages in a different notebook by passing the special 
-term "notebook:<NAME>", replacing "<NAME>" by the notebook name (if you need to 
+term "notebook:<NAME>", replacing "<NAME>" by the notebook name (if you need to
 search using a term starting with "notebook:", simply wrap it in double 
 quotes).
 
-3. Bugs
+# Bugs
 
 Please, send bug reports to dsboger at gmail dot com. Or fill them in github
 issue tracker.
