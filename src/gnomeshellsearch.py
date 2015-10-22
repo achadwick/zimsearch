@@ -206,8 +206,9 @@ class Provider(dbus.service.Object):
 	@dbus.service.method(dbus_interface=SEARCH_IFACE, 
 						in_signature='asu', out_signature='')
 	def LaunchSearch(self, terms, timestamp):
-		server = self._get_server()
-		gui = server.get_notebook(self.notebook)
-		gui.present()
-		gui.open_page()
+		if not self.search_all:
+			server = self._get_server()
+			gui = server.get_notebook(self.notebook)
+			gui.present()
+			gui.open_page()
 		
