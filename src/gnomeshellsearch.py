@@ -42,7 +42,8 @@ Disabling this plugin has no effect. Please, use the "System Settings > Search" 
 	}
 	
 	plugin_preferences = (
-		('search_all', 'bool', _('Search all notebooks, instead of only the default'), True),
+		('search_all', 'bool', \
+			_('Search all notebooks, instead of only the default'), True),
 	)
 	
 	def __init__(self, config=None):
@@ -84,13 +85,11 @@ class Provider(dbus.service.Object):
 	def GetInitialResultSet(self, terms, reply_handler, error_handler):
 		notebook_terms, normal_terms = self._process_terms(terms)
 		search_notebooks = self._get_search_notebooks(notebook_terms)
-		if not search_notebooks:
-			reply_handler([])
-		else:
-			result = []
+		result = []
+		if search_notebooks:
 			for search_notebook in search_notebooks:
 				result.extend(self._search_notebook(search_notebook, normal_terms))
-			reply_handler(result)
+		reply_handler(result)
 	
 	@dbus.service.method(dbus_interface=SEARCH_IFACE,
 				in_signature='asas', out_signature='as',
@@ -101,7 +100,8 @@ class Provider(dbus.service.Object):
 		for result_id in prev_results:
 			notebook_id, page_id = self._from_result_id(result_id)
 			notebook_id_lower = notebook_id.lower()
-			if (not notebook_terms) or self._contains_any_term(notebook_id_lower, notebook_terms):
+			if (not notebook_terms) or \
+					self._contains_any_term(notebook_id_lower, notebook_terms):
 				page_name_lower = page_id.split(':')[-1].lower()
 				if self._contains_all_terms(page_name_lower, normal_terms):
 					results.append(result_id)
