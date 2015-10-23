@@ -148,7 +148,8 @@ class Provider(dbus.service.Object):
 		normal_terms = []
 		for term in terms:
 			if term.startswith("#"):
-				notebook_terms.append(term[1:].lower())
+				if not notebook_terms:
+					notebook_terms.append(term[1:].lower())
 			else:
 				normal_terms.append(term.lower())
 		return notebook_terms, normal_terms
