@@ -4,4 +4,9 @@ aclocal.m4
 autom4te.cache/
 autoscan.log
 config/
+config.status
+config.log
 configure
+/.project
+/.pydevproject
+/.settings/
