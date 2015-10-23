@@ -167,20 +167,14 @@ class Provider(dbus.service.Object):
 		else:
 			search_notebooks_info.append(self.notebook.info)
 			
-		search_notebooks = []
 		for notebook_info in search_notebooks_info:
-			search_notebooks.append(self._load_notebook(notebook_info.name))
-			
-		return search_notebooks
+			yield self._load_notebook(notebook_info.name)
 
 	def _search_notebook(self, search_notebook, terms):
-		result = []
 		for page in search_notebook.index.walk():
 			page_name_lower = page.basename.lower()
 			if self._contains_all_terms(page_name_lower, terms):
-				result_id = self._to_result_id(search_notebook.name, page.name)
-				result.append(result_id)
-		return result
+				yield self._to_result_id(search_notebook.name, page.name)
 	
 	def _load_notebook(self, notebook_id):
 		if notebook_id in self.notebook_cache:
