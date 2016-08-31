@@ -2,6 +2,8 @@
 
 ## [Unreleased] [unreleased]
 ### Changed:
+- install: install to /usr/local/share/zim/plugins by default
+- build: Started using distutils
 - docs: Converted documentation to Markdown syntax
 - core: LaunchSearch only makes sense if not search_all
 - core: LaunchSearch opens Jump To (Ctrl+J) and not Search (Ctrl+Shift+F)
