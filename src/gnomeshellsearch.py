@@ -5,6 +5,7 @@
 '''Zim plugin to display Zim pages in GNOME Shell search results.
 '''
 
+import json
 import logging
 
 logger = logging.getLogger('zim.plugins.gnomeshellsearch')
@@ -204,10 +205,18 @@ class Provider(dbus.service.Object):
 		return zim.ipc.ServerProxy()
 	
 	def _to_result_id(self, notebook_id, page_id):
-		return notebook_id + "#" + page_id
+		result_dict = {
+			"notebook": notebook_id,
+			"page": page_id,
+		}
+		return json.dumps(result_dict)
 	
 	def _from_result_id(self, result_id):
-		return result_id.split("#")
+		result_dict = json.loads(result_id)
+		return (
+			result_dict.get("notebook", self.notebook.name),
+			result_dict.get("page", "New Page"),
+		)
 	
 	def _contains_all_terms(self, contents, terms):
 		for term in terms:
