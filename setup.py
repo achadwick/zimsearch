@@ -70,6 +70,7 @@ setup(
     """).strip(),
     author='Davi da Silva Böger',
     author_email='dsboger [at] gmail [dot] com',
+    scripts=["zim-gnomeshellsearch"],
     data_files=[
         ('share/zim/plugins',
             ["src/gnomeshellsearch.py"]),
