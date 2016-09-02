@@ -2,6 +2,7 @@
 
 ## [Unreleased] [unreleased]
 ### Changed:
+- core: Do not show notebook name if only searching default notebook
 - docs: Converted documentation to Markdown syntax
 - core: LaunchSearch only makes sense if not search_all
 - core: LaunchSearch opens Jump To (Ctrl+J) and not Search (Ctrl+Shift+F)
