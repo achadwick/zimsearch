@@ -115,7 +115,14 @@ class Provider(dbus.service.Object):
 			notebook_id, page_id = self._from_result_id(result_id)
 			path = page_id.split(":")
 			name = path[-1]
-			description = "(#%s) %s" % (notebook_id, "/".join(path[0:-1]))
+			if self.search_all:
+				template = "(#{notebook}) {path}"
+			else:
+				template = "{path}"
+			description = template.format(
+				notebook=notebook_id,
+				path="/".join(path[0:-1]),
+			)
 			meta = {
 				"id": result_id,
 				"name": name,
