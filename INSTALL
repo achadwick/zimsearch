@@ -1,4 +1,16 @@
-./autogen.sh
-PYTHON=<path to python 2> ./configure
-make
-make install
+It's worth seeing where files will go first:
+
+    python2 ./setup.py --dry-run install
+    python ./setup.py --dry-run install --prefix=/usr
+
+When you're happy with the scenario, run the setup script command
+without --dry-run. The default installation goes in /usr/local, try
+this if you're unsure:
+
+    python2 ./setup.py install
+
+Due to limitations of the GNOME search provider interface, this plugin
+must be installed into $XDG_DATA_DIRS (i.e. /usr/local/share or
+/usr/share). The default prefix will do this. You cannot install it
+sensibly into $XDG_DATA_HOME ($HOME/.local/share) because DBus service
+activation requires an absolute path.
