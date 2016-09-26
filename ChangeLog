@@ -2,6 +2,7 @@
 
 ## [Unreleased] [unreleased]
 ### Changed:
+- core: Do not show notebook name if only searching default notebook
 - install: install to /usr/local/share/zim/plugins by default
 - build: Started using distutils
 - docs: Converted documentation to Markdown syntax
