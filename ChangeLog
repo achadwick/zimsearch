@@ -1,7 +1,15 @@
 # Change Log
 
-## [Unreleased] [unreleased]
-### Changed:
+## 0.0.1 [unreleased]
+
+- Install with pip and setuptools for greater maintainability.
+- Docs updates.
+- Change of project ownership (@dsboger → @achadwick).
+- Can now create pages by typing a non-existing title in the search.
+- Application icon now does something.
+
+## 0.0.0 [unreleased]
+
 - core: Do not show notebook name if only searching default notebook
 - install: install to /usr/local/share/zim/plugins by default
 - build: Started using distutils
