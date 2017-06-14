@@ -23,7 +23,7 @@ TBD
 
 If you have all the dependencies already:
 
-* Run “`pip install --system .`”
+* Run “`sudo pip install .`” or “`pip install --system .`”
 * Log out and back in again
 
 For detailed instructions, see the [Installation Guide][].
