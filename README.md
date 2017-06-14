@@ -1,5 +1,7 @@
 # Zim Search plugin for GNOME
 
+[![Build Status](https://travis-ci.org/achadwick/zimsearch.svg?branch=master)](https://travis-ci.org/achadwick/zimsearch)
+
 Zimsearch lets you search through your [Zim][] Desktop Wiki pages
 comfortably from the Activities Overview search box of the GNOME 3
 Shell. It acts as a GNOME [desktop search provider][], and also as a

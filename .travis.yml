@@ -1,0 +1,16 @@
+language: generic
+
+sudo: required
+
+dist: trusty
+
+addons:
+  apt:
+    packages:
+      - python-pip
+      - python-dbus
+
+script:
+    - sudo -H pip install --verbose .
+    - pip freeze | grep -i zimsearch
+    - sudo -H pip uninstall --yes zimsearch
