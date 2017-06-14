@@ -108,6 +108,27 @@ class install_data (_install_data):
             result = (outfile, 1)
         return result
 
+    def run(self):
+        """Override for the default, with more permissions management."""
+
+        # Assume this bit gets mkpath() permissions right.
+        _install_data.run(self)
+
+        # Make sure that every data file that got installed is at least
+        # world-readable.
+        if not self.dry_run:
+            rrr = 0o444
+            for file in self.outfiles:
+                sbuf = os.stat(file)
+                assert sbuf is not None, "Installation has not taken place"
+                if (sbuf.st_mode & rrr) != rrr:
+                    mode = sbuf.st_mode | rrr
+                    self.announce(
+                        "chmod 0%03o %r" % (mode & 0o666, file),
+                        level=2,
+                    )
+                    os.chmod(file, mode)
+
 
 # Script and GNOME search provider installation:
 
