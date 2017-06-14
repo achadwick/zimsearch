@@ -25,12 +25,17 @@ To fetch and install zimsearch, try:
     cd path/to/src
     git clone https://github.com/achadwick/zimsearch.git
     cd zimsearch
-    pip install --system .
+    sudo pip install .   # normally uses /usr/local/share
 
-You may need to use `sudo`, but it's at your own risk.
+If you normally have write access to `/usr/local` with an
+otherwise unprivileged install account, you don't have to use
+`sudo`. But please use `--system` where it's supported if
+you are doing this.
 
-All the usual pip and setup.py options are supported, but installations in your personal home folder with `--user` won't work. That's because `gnome-shell`
-does not look in user homes for its search providers.
+All the usual pip and setup.py options are supported, but
+installations in your personal home folder's `.local` won't
+work. That's because `gnome-shell` does not look in user
+homes for its search providers.
 
 You'll need to log out and back in again after installing.
 
@@ -38,7 +43,7 @@ You'll need to log out and back in again after installing.
 
     cd path/to/src/zimsearch
     git pull
-    pip install --system --upgrade .
+    sudo pip install --upgrade .
 
 ## Uninstalling Zimsearch
 
