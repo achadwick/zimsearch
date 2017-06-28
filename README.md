@@ -64,16 +64,16 @@ default notebook, but you can select others with `#` terms as above.
 
 ## Development
 
+GitHub: <https://github.com/achadwick/zimsearch>
+
+See the [Contributor Guide][] if you'd like to help develop Zimsearch,
+or just get a bug fixed.
+
 ### Authors
 
 * Andrew Chadwick (current maintainer)
 * Davi da Silva Böger (original author)
 
-### Contributing
-
-GitHub: <https://github.com/achadwick/zimsearch>
-
-Please file bug reports or feature requests in the GitHub issue tracker.
 
 [Installation Guide]: INSTALL.md
 [Zim]: http://zim-wiki.org/
@@ -81,3 +81,4 @@ Please file bug reports or feature requests in the GitHub issue tracker.
 [Notational Velocity]: http://notational.net
 [desktop search provider]: https://developer.gnome.org/SearchProvider/
 [Zim plugin]: https://github.com/jaap-karssenberg/zim-wiki/wiki/Plugins
+[Contributor Guide]: Contributing.md
