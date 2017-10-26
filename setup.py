@@ -37,7 +37,7 @@ finally:
 
 # Support classes:
 
-class install (_install):
+class install (_install):  # noqa: N801
     """Standard install command, extended for data & var substitution.
 
     Setuptools has a design flaw whereby data cannot be installed except
@@ -56,7 +56,7 @@ class install (_install):
             install_data.run()
 
 
-class install_data (_install_data):
+class install_data (_install_data):  # noqa: N801
     """Standard install_data command, extended for variable substitution
 
     This recognises input filenames with ".in" filename extensions, and
