@@ -134,9 +134,9 @@ class install_data (_install_data):  # noqa: N801
 
 setup(
     name='zimsearch',
-    version='0.0.1',
+    version='0.0.2a',  # SemVer, interfaces unstable [0.x] while Zim's are too.
     license="GPL-2.0+",
-    description='GNOME integration for Zim',
+    description='GNOME integration for Zim 0.67+',
     url='https://github.com/achadwick/zimsearch',
     requires=["dbus"],
     long_description=textwrap.dedent("""

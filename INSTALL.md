@@ -3,8 +3,10 @@
 ## Dependencies
 
 You need to install the `dbus` Python 2 module from your OS
-distribution, and the standard Python package manager `pip`. You need
-[Zim][] too.
+distribution, and the standard Python package manager `pip`.
+
+You need [Zim][] too.
+This plugin is written for Zim 0.67 and later.
 
 ### Debian and derivatives
 
