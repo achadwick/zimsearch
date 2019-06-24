@@ -1,4 +1,3 @@
-#!/usr/bin/env python2
 # -*- encoding: utf-8 -*-
 
 from __future__ import print_function
@@ -6,15 +5,6 @@ from __future__ import print_function
 import os
 import sys
 import textwrap
-
-
-# The launcher script doesn't strictly require Python 2, but the plugin
-# code does. Not that we install any modules just yet.
-
-if not ((2,) < sys.version_info < (3,)):
-    print("This program requires Python 2.", file=sys.stderr)
-    print("Please re-run with python2 (or pip2).", file=sys.stderr)
-    sys.exit(1)
 
 
 # Setuptools/distutils import compatability:
