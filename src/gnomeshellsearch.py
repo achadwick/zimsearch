@@ -16,11 +16,15 @@ from zim.plugins import PluginClass
 from zim.search import SearchSelection
 from zim.search import Query
 
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
+
 logger = logging.getLogger(__name__)
 ZIM_COMMAND = "zim"
 
 
-# Zim plugin inegration:
+# Zim plugin integration:
 
 class GnomeShellSearchPluginCommand (NotebookCommand):
     """Class to handle "zim --plugin GnomeShellSearch [NOTEBOOK]"."""
@@ -95,14 +99,10 @@ class Provider (dbus.service.Object):
         self.search_all = search_all
 
     def main(self):
-        import gtk
-
-        gtk.main()
+        Gtk.main()
 
     def quit(self):
-        import gtk
-
-        gtk.main_quit()
+        Gtk.main_quit()
 
     @dbus.service.method(dbus_interface=SEARCH_IFACE,
                          in_signature='as', out_signature='as',
