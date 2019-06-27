@@ -70,8 +70,8 @@ class GnomeShellSearch (PluginClass):
         ),
     )
 
-    def __init__(self, config=None):
-        PluginClass.__init__(self, config)
+    def __init__(self):
+        PluginClass.__init__(self)
 
 
 # Dbus activation and search provider:
