@@ -306,7 +306,6 @@ class Provider (dbus.service.Object):
 
     def _contains_all_terms(self, contents, terms):
         for term in terms:
-            # Py3: use str(x), x.casefold()
-            if unicode(term).lower() not in unicode(contents).lower():
+            if str(term).casefold() not in str(contents).casefold()
                 return False
         return True
