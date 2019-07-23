@@ -11,6 +11,7 @@ from gettext import gettext as _
 import subprocess
 
 import dbus.service
+from gi.repository import GLib
 from zim.main import NotebookCommand
 from zim.plugins import PluginClass
 from zim.search import SearchSelection
@@ -95,19 +96,16 @@ class Provider (dbus.service.Object):
         self.search_all = search_all
 
     def main(self):
-        import gtk
-
-        gtk.main()
+        GLib.MainLoop().run()
 
     def quit(self):
-        import gtk
-
-        gtk.main_quit()
+        GLib.MainLoop().quit()
 
     @dbus.service.method(dbus_interface=SEARCH_IFACE,
                          in_signature='as', out_signature='as',
                          async_callbacks=('reply_handler', 'error_handler'))
     def GetInitialResultSet(self, terms, reply_handler, error_handler):
+        print('->', terms)
         """Handles the initial search."""
         results = self._get_search_results(terms)
         reply_handler(results)
