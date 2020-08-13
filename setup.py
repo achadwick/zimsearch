@@ -7,16 +7,6 @@ import os
 import sys
 import textwrap
 
-
-# The launcher script doesn't strictly require Python 2, but the plugin
-# code does. Not that we install any modules just yet.
-
-if not ((2,) < sys.version_info < (3,)):
-    print("This program requires Python 2.", file=sys.stderr)
-    print("Please re-run with python2 (or pip2).", file=sys.stderr)
-    sys.exit(1)
-
-
 # Setuptools/distutils import compatability:
 
 try:
@@ -34,10 +24,10 @@ except:
 finally:
     from distutils.command.install_data import install_data as _install_data
 
-
 # Support classes:
 
-class install (_install):  # noqa: N801
+
+class install(_install):  # noqa: N801
     """Standard install command, extended for data & var substitution.
 
     Setuptools has a design flaw whereby data cannot be installed except
@@ -46,7 +36,6 @@ class install (_install):  # noqa: N801
     of "pip uninstall" however, because the alternatives are nasty.
 
     """
-
     def run(self):
         """Override, adding back in what "install_data" used to do."""
         _install.run(self)
@@ -56,7 +45,7 @@ class install (_install):  # noqa: N801
             install_data.run()
 
 
-class install_data (_install_data):  # noqa: N801
+class install_data(_install_data):  # noqa: N801
     """Standard install_data command, extended for variable substitution
 
     This recognises input filenames with ".in" filename extensions, and
@@ -85,15 +74,14 @@ class install_data (_install_data):  # noqa: N801
 
         """
         if not infile.endswith(".in"):
-            result = _install_data.copy_file(self, infile, outdir,
-                                             *args, **kwargs)
+            result = _install_data.copy_file(self, infile, outdir, *args,
+                                             **kwargs)
         else:
             out_basename = os.path.basename(infile)
             (out_basename, _) = os.path.splitext(out_basename)
             outfile = os.path.join(outdir, out_basename)
-            self.announce("expanding %s -> %s" % (infile, outfile),
-                          level=2)
-            self.announce("substs: %r" % (self.substs,), level=1)
+            self.announce("expanding %s -> %s" % (infile, outfile), level=2)
+            self.announce("substs: %r" % (self.substs, ), level=1)
             if not self.dry_run:
                 in_fp = open(infile, 'r')
                 if os.path.exists(outfile):
@@ -134,7 +122,7 @@ class install_data (_install_data):  # noqa: N801
 
 setup(
     name='zimsearch',
-    version='0.0.2a',  # SemVer, interfaces unstable [0.x] while Zim's are too.
+    version='0.0.2a1',  # SemVer, interfaces unstable [0.x] while Zim's are too.
     license="GPL-2.0+",
     description='GNOME integration for Zim 0.67+',
     url='https://github.com/achadwick/zimsearch',
@@ -149,12 +137,11 @@ setup(
     author_email='a.t.chadwick@gmail.com',
     scripts=["zim-gnomeshellsearch"],
     data_files=[
-        ('share/zim/plugins',
-            ["src/gnomeshellsearch.py"]),
+        ('share/zim/plugins', ["src/gnomeshellsearch.py"]),
         ('share/dbus-1/services',
-            ["data/zim.plugins.gnomeshellsearch.provider.service.in"]),
+         ["data/zim.plugins.gnomeshellsearch.provider.service.in"]),
         ('share/gnome-shell/search-providers',
-            ["data/zim.plugins.gnomeshellsearch.provider.ini.in"]),
+         ["data/zim.plugins.gnomeshellsearch.provider.ini.in"]),
     ],
     cmdclass={
         'install': install,
@@ -169,8 +156,10 @@ setup(
         "Intended Audience :: End Users/Desktop",
         "Operating System :: POSIX",
         "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 3",
         "Topic :: Desktop Environment",
         "Topic :: Utilities",
     ],
     include_package_data=True,
+    use_2to3=True,
 )
