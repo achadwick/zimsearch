@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright 2016-2017 Andrew Chadwick <a.t.chadwick@gmail.com>
 # Copyright 2014-2015 Davi da Silva Böger <dsboger@gmail.com>
-
 """Zim plugin to display Zim pages in GNOME Shell search results."""
 
 import json
@@ -18,7 +17,6 @@ from zim.search import Query
 
 logger = logging.getLogger(__name__)
 ZIM_COMMAND = "zim"
-
 
 # Zim plugin inegration:
 
@@ -95,14 +93,14 @@ class Provider (dbus.service.Object):
         self.search_all = search_all
 
     def main(self):
-        import gtk
+        from gi.repository import Gtk
 
-        gtk.main()
+        Gtk.main()
 
     def quit(self):
-        import gtk
+        from gi.repository import Gtk
 
-        gtk.main_quit()
+        Gtk.main_quit()
 
     @dbus.service.method(dbus_interface=SEARCH_IFACE,
                          in_signature='as', out_signature='as',
