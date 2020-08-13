@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # Copyright 2016-2017 Andrew Chadwick <a.t.chadwick@gmail.com>
 # Copyright 2014-2015 Davi da Silva Böger <dsboger@gmail.com>
-
 """Zim plugin to display Zim pages in GNOME Shell search results."""
 
+import os
 import json
 import logging
 import textwrap
@@ -18,7 +18,6 @@ from zim.search import Query
 
 logger = logging.getLogger(__name__)
 ZIM_COMMAND = "zim"
-
 
 # Zim plugin inegration:
 
@@ -36,11 +35,11 @@ class GnomeShellSearchPluginCommand (NotebookCommand):
             logger.error("No notebooks?")
             return
         notebook, _junk = zim.notebook.build_notebook(notebook_info)
-        config_manager = ConfigManager()
-        config_dict = config_manager.get_config_dict('preferences.conf')
+        config_manager = ConfigManager
+        config_dict = config_manager.preferences
         preferences = config_dict['GnomeShellSearch']
         preferences.setdefault('search_all', True)
-        Provider(notebook, preferences['search_all']).main()
+        Provider.main()
 
 
 class GnomeShellSearch (PluginClass):
@@ -66,8 +65,31 @@ class GnomeShellSearch (PluginClass):
         ),
     )
 
-    def __init__(self, config=None):
-        PluginClass.__init__(self, config)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        notebook = self.get_default_or_only_notebook()
+        logger.debug("{} notebook is set as default in shell search.".format(notebook))
+        if not Provider.run_flag:
+            Provider(notebook=notebook,search_all=self.preferences['search_all'])
+    
+    @staticmethod
+    def get_default_or_only_notebook():
+        """
+        Most of this method is copied from `zim.main.NotebookCommand.get_default_or_onlly_notebook`.
+        But this method return a notebook directly instead (just like `GnomeShellSearchPlugin.run` did).
+        """
+        from zim.notebook import get_notebook_list, resolve_notebook, build_notebook
+        notebooks = get_notebook_list()
+        uri = None
+        if notebooks.default:
+            uri = notebooks.default.uri
+        elif len(notebooks) == 1:
+            uri = notebooks[0].uri
+        else:
+            return None
+        notebook_info = resolve_notebook(uri, pwd=os.getcwd())  # The `pwd` is default value of `zim.main.Command.pwd`
+        result, _ = build_notebook(notebook_info)
+        return result
 
 
 # Dbus activation and search provider:
@@ -77,9 +99,20 @@ BUS_NAME = 'net.launchpad.zim.plugins.gnomeshellsearch.provider'
 OBJECT_PATH = '/net/launchpad/zim/plugins/gnomeshellsearch/provider'
 
 
-class Provider (dbus.service.Object):
+class Provider(dbus.service.Object):
+    """
+    The main search provider.  
+    To ensure that the provider does not started before, check `Provider.run_flag` before to construct the class.
+    For example:
+
+        if not Provider.run_flag:
+            Provider(...)
+    """
+    run_flag = False
 
     def __init__(self, notebook=None, search_all=True):
+        assert (not self.run_flag)  # make sure the Provider does not run twice or more in one application
+        self.run_flag = True
         import dbus.mainloop.glib
 
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
@@ -94,15 +127,17 @@ class Provider (dbus.service.Object):
         self.notebook_cache = {}
         self.search_all = search_all
 
-    def main(self):
-        import gtk
+    @staticmethod
+    def main():
+        from gi.repository import GLib
 
-        gtk.main()
+        GLib.MainLoop().run()
 
-    def quit(self):
-        import gtk
+    @staticmethod
+    def quit():
+        from gi.repository import GLib
 
-        gtk.main_quit()
+        GLib.MainLoop().quit()
 
     @dbus.service.method(dbus_interface=SEARCH_IFACE,
                          in_signature='as', out_signature='as',
