@@ -93,14 +93,14 @@ class Provider (dbus.service.Object):
         self.search_all = search_all
 
     def main(self):
-        from gi.repository import Gtk
+        from gi.repository import GLib
 
-        Gtk.main()
+        GLib.MainLoop().run()
 
     def quit(self):
-        from gi.repository import Gtk
+        from gi.repository import GLib
 
-        Gtk.main_quit()
+        GLib.MainLoop().quit()
 
     @dbus.service.method(dbus_interface=SEARCH_IFACE,
                          in_signature='as', out_signature='as',
