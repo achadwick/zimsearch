@@ -54,9 +54,9 @@ class GnomeShellSearch (PluginClass):
             Disabling this plugin has no effect.
             Please use “System Settings → Search” in GNOME
             to disable Zimsearch results.
-        """)),  # T: plugin description
+            """)),  # T: plugin description
         'author': 'Davi da Silva Böger',
-    }
+        }
 
     plugin_preferences = (
         (
@@ -64,7 +64,7 @@ class GnomeShellSearch (PluginClass):
             _('Search all notebooks, instead of only the default'),
             True,
         ),
-    )
+        )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -119,7 +119,8 @@ class Provider(dbus.service.Object):
     run_flag = False
 
     def __init__(self, notebook=None, search_all=True):
-        assert (not self.run_flag)  # make sure the Provider does not run twice or more in one application
+        # make sure the Provider does not run twice or more in one application
+        assert (not self.run_flag)
         self.run_flag = True
         import dbus.mainloop.glib
 
@@ -129,7 +130,7 @@ class Provider(dbus.service.Object):
             self,
             bus_name=name,
             object_path=OBJECT_PATH,
-        )
+            )
 
         self.notebook = notebook
         self.notebook_cache = {}
@@ -138,13 +139,11 @@ class Provider(dbus.service.Object):
     @staticmethod
     def main():
         from gi.repository import GLib
-
         GLib.MainLoop().run()
 
     @staticmethod
     def quit():
         from gi.repository import GLib
-
         GLib.MainLoop().quit()
 
     @dbus.service.method(dbus_interface=SEARCH_IFACE,
@@ -180,7 +179,7 @@ class Provider(dbus.service.Object):
             description = template.format(
                 notebook=notebook_id,
                 path="/".join(path[0:-1]),
-            )
+                )
             icon = "text-x-generic"
             if create:
                 name = _(u"New page: “{}”").format(name)
@@ -190,7 +189,7 @@ class Provider(dbus.service.Object):
                 "name": name,
                 "gicon": icon,
                 "description": description,
-            }
+                }
             metas.append(meta)
         return metas
 
@@ -206,7 +205,7 @@ class Provider(dbus.service.Object):
                 args=[ZIM_COMMAND, notebook_id, page_id],
                 close_fds=True,
                 cwd="/",
-            )
+                )
             logger.debug("ActivateResult: done (rc=%r)", proc.returncode)
         except:
             logger.exception("ActivateResult failed")
@@ -214,14 +213,14 @@ class Provider(dbus.service.Object):
     @dbus.service.method(dbus_interface=SEARCH_IFACE,
                          in_signature='asu', out_signature='')
     def LaunchSearch(self, terms, timestamp):
-        """Handles the user choosing the app icon on the left of the results.
+        """
+        Handles the user choosing the app icon on the left of the results.
 
         This is supposed to launch the application itself, with the
         search terms already typed in.
         After upstream's changes for 0.67, we cannot do this without
         reimplementing as an GApplication and zim-plugin pair.
         While we're in transition, just show the list.
-
         """
         try:
             proc = subprocess.Popen(
@@ -254,14 +253,14 @@ class Provider(dbus.service.Object):
             logger.exception("_get_search_results() failed")
 
     def _process_results(self, results, notebook_terms, normal_terms):
-        """Post-processing of the results set.
+        """
+        Post-processing of the results set.
 
         This adds extra "New page" results for all matching notebooks,
         or the default notebook if there were no notebook terms.
 
         The new-page results are only appended if there are no
-        preexising entries in the results.
-
+        preexisting entries in the results.
         """
 
         if len(results) > 0:
@@ -283,8 +282,7 @@ class Provider(dbus.service.Object):
                     results.append(result_id)
         else:
             notebook_id = self.notebook.name
-            result_id = self._to_result_id(notebook_id, page_name,
-                                           create=True)
+            result_id = self._to_result_id(notebook_id, page_name, create=True)
             results.append(result_id)
 
     def _process_terms(self, terms):
@@ -336,7 +334,7 @@ class Provider(dbus.service.Object):
             "notebook": notebook_id,
             "page": page_id,
             "create": create,
-        }
+            }
         return json.dumps(result_dict)
 
     def _from_result_id(self, result_id):
@@ -345,7 +343,7 @@ class Provider(dbus.service.Object):
             result_dict.get("notebook", self.notebook.name),
             result_dict.get("page", "New Page"),
             result_dict.get("create", False),
-        )
+            )
 
     def _contains_all_terms(self, contents, terms):
         for term in terms:

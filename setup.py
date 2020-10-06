@@ -7,7 +7,7 @@ import sys
 import textwrap
 
 
-# Setuptools/distutils import compatability:
+# Setuptools/distutils import compatibility:
 
 try:
     from setuptools import setup
@@ -28,13 +28,13 @@ finally:
 
 
 class install(_install):  # noqa: N801
-    """Standard install command, extended for data & var substitution.
+    """
+    Standard install command, extended for data & var substitution.
 
     Setuptools has a design flaw whereby data cannot be installed except
     as package data. Since everything about this double-ended plugin is
     a data file, that's a problem. We want setuptools for its support
     of "pip uninstall" however, because the alternatives are nasty.
-
     """
     def run(self):
         """Override, adding back in what "install_data" used to do."""
@@ -46,15 +46,15 @@ class install(_install):  # noqa: N801
 
 
 class install_data(_install_data):  # noqa: N801
-    """Standard install_data command, extended for variable substitution
+    """
+    Standard install_data command, extended for variable substitution.
 
-    This recognises input filenames with ".in" filename extensions, and
+    This recognizes input filenames with ".in" filename extensions, and
     performs some variable subsitutions on them instead of a regular
     copy. Subst'ed output files are written without the extension.
 
+    All this just because DBUS .service files require an absolute path.
     """
-    # All this just because DBUS .service files require an absolute path
-
     @property
     def substs(self):
         try:
@@ -64,14 +64,13 @@ class install_data(_install_data):  # noqa: N801
             self.__substs = [
                 ("@INSTALL_DATA_DIR@", self.install_dir),
                 ("@INSTALL_SCRIPTS_DIR@", install_scripts.install_dir),
-            ]
+                ]
             return self.__substs
 
     def copy_file(self, infile, outdir, *args, **kwargs):
-        """Copy a file into place, with substitutions.
-
+        """
+        Copy a file into place, with substitutions.
         The destination must be a directory, not a file.
-
         """
         if not infile.endswith(".in"):
             result = _install_data.copy_file(self, infile, outdir, *args,
@@ -114,7 +113,7 @@ class install_data(_install_data):  # noqa: N801
                     self.announce(
                         "chmod 0%03o %r" % (mode & 0o666, file),
                         level=2,
-                    )
+                        )
                     os.chmod(file, mode)
 
 
@@ -132,7 +131,7 @@ setup(
 
         This plugin provides search results from Zim in GNOME-shell's
         desktop search overlay.
-    """).strip(),
+        """).strip(),
     author='Andrew Chadwick',  # Formerly Davi da Silva Böger (@dsboger)
     author_email='a.t.chadwick@gmail.com',
     scripts=["zim-gnomeshellsearch"],
@@ -142,11 +141,11 @@ setup(
          ["data/zim.plugins.gnomeshellsearch.provider.service.in"]),
         ('share/gnome-shell/search-providers',
          ["data/zim.plugins.gnomeshellsearch.provider.ini.in"]),
-    ],
+        ],
     cmdclass={
         'install': install,
         'install_data': install_data,
-    },
+        },
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: X11 Applications :: Gnome",
@@ -159,7 +158,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Topic :: Desktop Environment",
         "Topic :: Utilities",
-    ],
+        ],
     include_package_data=True,
     use_2to3=True,
-)
+    )
