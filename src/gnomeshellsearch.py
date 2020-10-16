@@ -16,6 +16,10 @@ from zim.plugins import PluginClass
 from zim.search import SearchSelection
 from zim.search import Query
 
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
+
 logger = logging.getLogger(__name__)
 ZIM_COMMAND = "zim"
 
@@ -222,21 +226,14 @@ class Provider(dbus.service.Object):
         reimplementing as an GApplication and zim-plugin pair.
         While we're in transition, just show the list.
         """
-        try:
-            proc = subprocess.Popen(
-                args=[ZIM_COMMAND, "--list"],
-                close_fds=True,
-                cwd="/",
-            )
-            logger.debug("LaunchSearch: done (rc=%r)", proc.returncode)
-        except:
-            logger.exception("LaunchSearch failed")
+        sw = SearchWindow(self.results)
+        Gtk.main()
 
     def _get_search_results(self, terms):
         try:
             notebook_terms, normal_terms = self._process_terms(terms)
             notebooks = list(self._get_search_notebooks(notebook_terms))
-            results = []
+            self.results = []
             query_str = u" ".join(normal_terms)
             if not query_str.isspace():
                 query = Query(query_str)
@@ -246,9 +243,9 @@ class Provider(dbus.service.Object):
                     selection.search(query)
                     for path in selection:
                         rid = self._to_result_id(notebook.name, path.name)
-                        results.append(rid)
-            self._process_results(results, notebook_terms, normal_terms)
-            return results
+                        self.results.append(rid)
+            self._process_results(self.results, notebook_terms, normal_terms)
+            return self.results
         except:
             logger.exception("_get_search_results() failed")
 
@@ -350,3 +347,97 @@ class Provider(dbus.service.Object):
             if str(term).casefold() not in str(contents).casefold():
                 return False
         return True
+
+
+class SearchWindow(Gtk.Window):
+    """
+    Search result window.
+    """
+    def __init__(self, results):
+        Gtk.Window.__init__(self, title=_("Zim search"))
+        self.connect("delete-event", self.exit_app)
+
+        # build GUI
+        # ====================================================================
+        win_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.add(win_box)
+
+        # Next step is to add search to this window...
+        #self.search_box = Gtk.Entry()
+        #win_box.add(self.search_box)
+
+        self.box=Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+
+        scroll_window = Gtk.ScrolledWindow()
+        scroll_window.set_min_content_width(200)
+        scroll_window.set_min_content_height(200)
+        scroll_window.set_vexpand(True)
+        scroll_window.set_propagate_natural_width(True)
+        scroll_window.set_propagate_natural_height(True)
+
+        scroll_window.add(self.box)
+
+        win_box.pack_start(scroll_window, True, True, 0)
+        # ====================================================================
+
+        self.results_dict = self.convert_to_dict(results)
+
+        for notebook_name in self.results_dict:
+            lbl = Gtk.Label(notebook_name)
+            lbl.set_margin_top(10)
+            self.box.add(lbl)
+            pages = self.results_dict.get(notebook_name)
+            for page in pages:
+                btn = Gtk.Button(page)
+                btn.connect("clicked", self.open_result,
+                            (notebook_name, page))
+                self.box.add(btn)
+
+        self.set_position(Gtk.WindowPosition.CENTER)
+        self.show_all()
+
+    def _from_result_id(self, result_id):
+        """
+        Convert result_id to item as list.
+        """
+        result_dict = json.loads(result_id)
+        return (
+            result_dict.get("notebook"),
+            result_dict.get("page"),
+            result_dict.get("create", False),
+            )
+
+    def convert_to_dict(self, results):
+        """
+        Convert results from search provider to dict.
+           {notebook1: [page1, page2, ...],
+            ...
+            notebookN: [pageX, pageY, ...]}
+        """
+        result_dict = {}
+        for item in results:
+            result_item = self._from_result_id(item)
+            if result_dict.get(result_item[0]) is None:
+                result_dict[result_item[0]] = [result_item[1],]
+            else:
+                result_dict.get(result_item[0]).append(result_item[1])
+
+        return result_dict
+
+    def open_result(self, btn, result_item):
+        """
+        Activate some result.
+        Open this page in Zim.
+        """
+        proc = subprocess.Popen(
+            args=[ZIM_COMMAND, result_item[0], result_item[1]],
+            close_fds=True,
+            cwd="/",
+            )
+        self.exit_app()
+
+    def exit_app(self, *args):
+        """
+        Exit search window.
+        """
+        Gtk.main_quit()
