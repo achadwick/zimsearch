@@ -39,6 +39,10 @@ installations in your personal home folder's `.local` won't
 work. That's because `gnome-shell` does not look in user
 homes for its search providers.
 
+You may need to run this after install for zim to see it though.
+
+cp /usr/local/share/zim/plugins/gnomeshellsearch.py ~/.local/share/zim/plugins
+
 You'll need to log out and back in again after installing.
 
 ## Updating Zimsearch

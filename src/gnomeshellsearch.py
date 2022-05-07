@@ -58,6 +58,9 @@ class GnomeShellSearch (PluginClass):
             Disabling this plugin has no effect.
             Please use “System Settings → Search” in GNOME
             to disable Zimsearch results.
+            Changing the settings may require killing running 
+            "zim --plugin gnomeshellsearch" instances
+            and quit zim for the changes to be enacted.
             """)),  # T: plugin description
         'author': 'Davi da Silva Böger',
         }
@@ -66,6 +69,11 @@ class GnomeShellSearch (PluginClass):
         (
             'search_all', 'bool',
             _('Search all notebooks, instead of only the default'),
+            True,
+        ),
+        (
+            'search_names_only', 'bool',
+            _('Search only names, instead off full text search (Name:*query*).  MUCH faster'),
             True,
         ),
         )
@@ -77,7 +85,8 @@ class GnomeShellSearch (PluginClass):
             "{} notebook is set as default in shell search.".format(notebook))
         if not Provider.run_flag:
             Provider(notebook=notebook,
-                     search_all=self.preferences['search_all'])
+                     search_all=self.preferences['search_all'],
+                     search_names_only=self.preferences['search_names_only'])
 
     @staticmethod
     def get_default_or_only_notebook():
@@ -122,7 +131,7 @@ class Provider(dbus.service.Object):
     """
     run_flag = False
 
-    def __init__(self, notebook=None, search_all=True):
+    def __init__(self, notebook=None, search_all=True, search_names_only=True):
         # make sure the Provider does not run twice or more in one application
         assert (not self.run_flag)
         self.run_flag = True
@@ -139,6 +148,7 @@ class Provider(dbus.service.Object):
         self.notebook = notebook
         self.notebook_cache = {}
         self.search_all = search_all
+        self.search_names_only = search_names_only
 
     @staticmethod
     def main():
@@ -235,8 +245,12 @@ class Provider(dbus.service.Object):
             notebooks = list(self._get_search_notebooks(notebook_terms))
             self.results = []
             query_str = u" ".join(normal_terms)
+            query_str_name_only = u"Name:*" + u"* Name:*".join(normal_terms) + "*"
             if not query_str.isspace():
-                query = Query(query_str)
+                if self.search_names_only:
+                    query = Query(query_str_name_only)
+                else:
+                    query = Query(query_str)
                 for notebook in notebooks:
                     logger.debug('Searching %r for %r', notebook, query)
                     selection = SearchSelection(notebook)
