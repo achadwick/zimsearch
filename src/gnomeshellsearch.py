@@ -247,10 +247,10 @@ class Provider(dbus.service.Object):
             query_str = u" ".join(normal_terms)
             query_str_name_only = u"Name:*" + u"* Name:*".join(normal_terms) + "*"
             if not query_str.isspace():
-                if self.search_names_only:
+                if self.search_names_only and not "zim:" in query_str:
                     query = Query(query_str_name_only)
                 else:
-                    query = Query(query_str)
+                    query = Query(query_str.replace("zim:",""))
                 for notebook in notebooks:
                     logger.debug('Searching %r for %r', notebook, query)
                     selection = SearchSelection(notebook)
