@@ -73,7 +73,7 @@ class GnomeShellSearch (PluginClass):
         ),
         (
             'search_names_only', 'bool',
-            _('Search only names, instead off full text search (Name:*query*).  MUCH faster'),
+            _('Search only names, instead off full text search (Name:*query*).  MUCH faster. Override with zim:<search term>'),
             True,
         ),
         )
