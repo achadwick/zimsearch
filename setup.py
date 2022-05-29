@@ -1,4 +1,3 @@
-#!/usr/bin/env python2
 # -*- encoding: utf-8 -*-
 
 from __future__ import print_function
@@ -8,16 +7,7 @@ import sys
 import textwrap
 
 
-# The launcher script doesn't strictly require Python 2, but the plugin
-# code does. Not that we install any modules just yet.
-
-if not ((2,) < sys.version_info < (3,)):
-    print("This program requires Python 2.", file=sys.stderr)
-    print("Please re-run with python2 (or pip2).", file=sys.stderr)
-    sys.exit(1)
-
-
-# Setuptools/distutils import compatability:
+# Setuptools/distutils import compatibility:
 
 try:
     from setuptools import setup
@@ -34,19 +24,18 @@ except:
 finally:
     from distutils.command.install_data import install_data as _install_data
 
-
 # Support classes:
 
-class install (_install):  # noqa: N801
-    """Standard install command, extended for data & var substitution.
+
+class install(_install):  # noqa: N801
+    """
+    Standard install command, extended for data & var substitution.
 
     Setuptools has a design flaw whereby data cannot be installed except
     as package data. Since everything about this double-ended plugin is
     a data file, that's a problem. We want setuptools for its support
     of "pip uninstall" however, because the alternatives are nasty.
-
     """
-
     def run(self):
         """Override, adding back in what "install_data" used to do."""
         _install.run(self)
@@ -56,16 +45,16 @@ class install (_install):  # noqa: N801
             install_data.run()
 
 
-class install_data (_install_data):  # noqa: N801
-    """Standard install_data command, extended for variable substitution
+class install_data(_install_data):  # noqa: N801
+    """
+    Standard install_data command, extended for variable substitution.
 
-    This recognises input filenames with ".in" filename extensions, and
+    This recognizes input filenames with ".in" filename extensions, and
     performs some variable subsitutions on them instead of a regular
     copy. Subst'ed output files are written without the extension.
 
+    All this just because DBUS .service files require an absolute path.
     """
-    # All this just because DBUS .service files require an absolute path
-
     @property
     def substs(self):
         try:
@@ -75,25 +64,23 @@ class install_data (_install_data):  # noqa: N801
             self.__substs = [
                 ("@INSTALL_DATA_DIR@", self.install_dir),
                 ("@INSTALL_SCRIPTS_DIR@", install_scripts.install_dir),
-            ]
+                ]
             return self.__substs
 
     def copy_file(self, infile, outdir, *args, **kwargs):
-        """Copy a file into place, with substitutions.
-
+        """
+        Copy a file into place, with substitutions.
         The destination must be a directory, not a file.
-
         """
         if not infile.endswith(".in"):
-            result = _install_data.copy_file(self, infile, outdir,
-                                             *args, **kwargs)
+            result = _install_data.copy_file(self, infile, outdir, *args,
+                                             **kwargs)
         else:
             out_basename = os.path.basename(infile)
             (out_basename, _) = os.path.splitext(out_basename)
             outfile = os.path.join(outdir, out_basename)
-            self.announce("expanding %s -> %s" % (infile, outfile),
-                          level=2)
-            self.announce("substs: %r" % (self.substs,), level=1)
+            self.announce("expanding %s -> %s" % (infile, outfile), level=2)
+            self.announce("substs: %r" % (self.substs, ), level=1)
             if not self.dry_run:
                 in_fp = open(infile, 'r')
                 if os.path.exists(outfile):
@@ -126,7 +113,7 @@ class install_data (_install_data):  # noqa: N801
                     self.announce(
                         "chmod 0%03o %r" % (mode & 0o666, file),
                         level=2,
-                    )
+                        )
                     os.chmod(file, mode)
 
 
@@ -134,7 +121,7 @@ class install_data (_install_data):  # noqa: N801
 
 setup(
     name='zimsearch',
-    version='0.0.2a',  # SemVer, interfaces unstable [0.x] while Zim's are too.
+    version='0.0.2-alpha.0',  # SemVer, interfaces unstable [0.x] while Zim's are too.
     license="GPL-2.0+",
     description='GNOME integration for Zim 0.67+',
     url='https://github.com/achadwick/zimsearch',
@@ -144,22 +131,21 @@ setup(
 
         This plugin provides search results from Zim in GNOME-shell's
         desktop search overlay.
-    """).strip(),
+        """).strip(),
     author='Andrew Chadwick',  # Formerly Davi da Silva Böger (@dsboger)
     author_email='a.t.chadwick@gmail.com',
     scripts=["zim-gnomeshellsearch"],
     data_files=[
-        ('share/zim/plugins',
-            ["src/gnomeshellsearch.py"]),
+        ('share/zim/plugins', ["src/gnomeshellsearch.py"]),
         ('share/dbus-1/services',
-            ["data/zim.plugins.gnomeshellsearch.provider.service.in"]),
+         ["data/zim.plugins.gnomeshellsearch.provider.service.in"]),
         ('share/gnome-shell/search-providers',
-            ["data/zim.plugins.gnomeshellsearch.provider.ini.in"]),
-    ],
+         ["data/zim.plugins.gnomeshellsearch.provider.ini.in"]),
+        ],
     cmdclass={
         'install': install,
         'install_data': install_data,
-    },
+        },
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: X11 Applications :: Gnome",
@@ -169,8 +155,10 @@ setup(
         "Intended Audience :: End Users/Desktop",
         "Operating System :: POSIX",
         "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 3",
         "Topic :: Desktop Environment",
         "Topic :: Utilities",
-    ],
+        ],
     include_package_data=True,
-)
+    use_2to3=True,
+    )

@@ -53,6 +53,10 @@ It is also possible to limit the search to a certain notebook by adding
 a term preceded by a hash sign (`#`). Only notebooks whose names contain
 all the `#` terms are searched.
 
+There is a setting to do a full text search but it's about 200 times 
+slower (4s vs 0.2s) on my 600 page wiki.
+Searching with "zim:search text" will do a full text search even with it
+turned off in the config
 > <kbd>Meta</kbd> `Pancake batter #Recipes` <kbd>Return</kbd>
 
 ### Creating pages
